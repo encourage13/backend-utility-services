@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Составление заявки</title>
+  <link rel="stylesheet" href="/static/styles/site.css">
+</head>
+<body>
+  <header class="header">
+    <div class="inner">
+      <a class="brand" href="/">mos.ru</a>
+
+    </div>
+  </header>
+
+  <main>
+    <div class="container">
+      <h1 class="h1">Составление заявки</h1>
+
+      {{ range .services }}
+      <div class="service">
+        <div class="icon">
+          <img src="{{ .ImageURL }}" alt="{{ .Title }}">
+        </div>
+        <div class="box">
+          <h3>{{ .Title }}</h3>
+          <p>{{ .Description }}</p>
+          <a class="btn" href="/service/{{ .ID }}">Подробнее</a>
+        </div>
+      </div>
+      {{ end }}
+
+      <div class="total">
+        <label for="total">К оплате:</label>
+        <input id="total" type="text"> ₽
+      </div>
+    </div>
+  </main>
+</body>
+</html>

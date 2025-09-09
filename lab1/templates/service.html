@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>{{ .title }} — подробности</title>
+  <link rel="stylesheet" href="/static/styles/site.css">
+</head>
+<body>
+  <header class="header">
+    <div class="inner">
+      <a class="brand" href="/">mos.ru</a>
+
+    </div>
+  </header>
+
+  <main>
+    <div class="container">
+      <h1 class="h1">{{ .title }}</h1>
+      <div class="row">
+        <div class="panel media"><img src="{{ .img }}" alt="{{ .title }}"></div>
+        <div class="panel text">{{ .desc }}</div>
+      </div>
+    </div>
+  </main>
+</body>
+</html>
