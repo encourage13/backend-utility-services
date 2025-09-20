@@ -4,52 +4,45 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>Коммунальные услуги</title>
-  <link rel="stylesheet" href="/static/styles/site.css">
+  <link rel="stylesheet" href="/static/styles/index.css">
 </head>
 <body>
-  <header class="header">
-    <div class="inner">
-      <a class="brand" href="/">mos.ru</a>
+<header class="header">
+  <div class="inner"><a class="brand" href="/">mos.ru</a></div>
+</header>
 
+<main>
+  <div class="container index">
+    <h1 class="h1">Коммунальные услуги</h1>
+
+    <div class="search-wrap">
+      <form class="search" method="get" action="/"><input type="search_service" name="search_service" placeholder="Поиск услуг" value="{{ .search_service }}"></form>
     </div>
-  </header>
 
-  <main>
-    <div class="container">
-      <h1 class="h1">Коммунальные услуги</h1>
-
-      <!-- Поиск: GET /?q=... -->
-      <div class="search-wrap">
-        <form class="search" method="get" action="/">
-          <input type="search" name="q" placeholder="Поиск услуг" value="{{ .q }}">
-        </form>
-      </div>
-
-      <!-- Сетка карточек -->
-      <section class="grid">
-        {{ if .cards }}
-          {{ range .cards }}
-          <article class="card">
-            <div class="media"><img src="{{ .ImageURL }}" alt="{{ .Title }}"></div>
-            <div class="body">
-              <h3>{{ .Title }}</h3>
-              <a class="btn" href="/service/{{ .ID }}">Подробнее</a>
-            </div>
-          </article>
-          {{ end }}
-        {{ else }}
-          <div style="grid-column:1/-1;text-align:center;padding:24px;font-size:18px;">
-            Ничего не найдено по запросу «{{ .q }}».
-          </div>
-        {{ end }}
-      </section>
-    </div>
-  </main>
-
-  <!-- Плавающая корзина справа снизу -->
-  <div class="fab" onclick="window.location.href='/cart'">
-    <img src="/static/img/cart.png" alt="Корзина">
-    <span class="count">{{ .count }}</span>
+    <section class="grid">
+      {{ range .cards }}
+      <article class="card">
+        <div class="media"><img src="{{ .ImageURL }}" alt="{{ .Title }}"></div>
+        <div class="body">
+          <h3>{{ .Title }}</h3>
+          <a class="btn" href="/service/{{ .ID }}">Подробнее</a>
+        </div>
+      </article>
+      {{ end }}
+    </section>
   </div>
+</main>
+
+{{ if gt .count 0 }}
+<button class="fab" onclick="window.location.href='/cart'">
+  <img src="/static/img/cart_new.png" alt="К заявке">
+  <span class="count">{{ .count }}</span>
+</button>
+{{ else }}
+<button class="fab disabled" disabled>
+  <img src="/static/img/cart_new.png" alt="К заявке">
+  
+</button>
+{{ end }}
 </body>
 </html>

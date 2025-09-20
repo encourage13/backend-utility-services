@@ -4,38 +4,65 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>Составление заявки</title>
-  <link rel="stylesheet" href="/static/styles/site.css">
+  <link rel="stylesheet" href="/static/styles/cart.css">
 </head>
 <body>
-  <header class="header">
-    <div class="inner">
-      <a class="brand" href="/">mos.ru</a>
+<header class="header"><div class="inner"><a class="brand" href="/">mos.ru</a></div></header>
 
-    </div>
-  </header>
+<main>
+  <div class="container cart">
+    <h1 class="h1">Составление заявки</h1>
 
-  <main>
-    <div class="container">
-      <h1 class="h1">Составление заявки</h1>
+    <!-- Адрес — как поле поиска -->
+    <section class="address-card">
+      <input type="text" placeholder="Введите адрес">
+    </section>
 
-      {{ range .services }}
-      <div class="service">
-        <div class="icon">
-          <img src="{{ .ImageURL }}" alt="{{ .Title }}">
-        </div>
-        <div class="box">
+    <!-- Услуги -->
+    {{ range .services }}
+    <div class="service-row">
+      <!-- Карточка услуги -->
+      <section class="service-card">
+        <img class="icon" src="{{ .ImageURL }}" alt="{{ .Title }}">
+        <div class="body">
           <h3>{{ .Title }}</h3>
           <p>{{ .Description }}</p>
-          <a class="btn" href="/service/{{ .ID }}">Подробнее</a>
+          <div class="inputs">
+            <div class="field"><label>Расход</label><input type="text" value="{{.Consumption}}"><label>{{ .Unit }}</label></div>
+            <div class="field">
+              <label>Тариф</label>
+              <input type="text" value = "{{.Tariff}}"><span class="u">₽</span>
+            </div>
+            <div class="field"><label>Итого</label><input type="text" value = "{{.Total}}"><span class="u">₽</span></div>
+          </div>
         </div>
-      </div>
-      {{ end }}
+      </section>
 
-      <div class="total">
-        <label for="total">К оплате:</label>
-        <input id="total" type="text"> ₽
-      </div>
+      <!-- Кнопка-заглушка удаления (вне карточки, справа по центру) -->
+      <button type="button" class="delete-btn" aria-label="Удалить" disabled>
+        <img src="/static/img/trash.svg" alt="">
+      </button>
     </div>
-  </main>
+    {{ end }}
+
+    <!-- Итого — без «карточки» вокруг -->
+    <div class="total-card">
+      <label for="total">К оплате:</label>
+      <input id="total" type="text" value="{{.total}}"><span>₽</span>
+    </div>
+  </div>
+</main>
+
+{{ if gt .count 0 }}
+<button class="fab" onclick="window.location.href='/cart'">
+  <img src="/static/img/cart_new.png" alt="К заявке">
+  <span class="count">{{ .count }}</span>
+</button>
+{{ else }}
+<button class="fab disabled" disabled>
+  <img src="/static/img/cart_new.png" alt="К заявке">
+  
+</button>
+{{ end }}
 </body>
 </html>
