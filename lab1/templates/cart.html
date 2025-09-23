@@ -13,43 +13,62 @@
   <div class="container cart">
     <h1 class="h1">Составление заявки</h1>
 
-    <!-- Адрес — как поле поиска -->
     <section class="address-card">
       <input type="text" placeholder="Введите адрес">
     </section>
 
-    <!-- Услуги -->
-    {{ range .services }}
-    <div class="service-row">
-      <!-- Карточка услуги -->
-      <section class="service-card">
-        <img class="icon" src="{{ .ImageURL }}" alt="{{ .Title }}">
-        <div class="body">
-          <h3>{{ .Title }}</h3>
-          <p>{{ .Description }}</p>
-          <div class="inputs">
-            <div class="field"><label>Расход</label><input type="text" value="{{.Consumption}}"><label>{{ .Unit }}</label></div>
-            <div class="field">
-              <label>Тариф</label>
-              <input type="text" value = "{{.Tariff}}"><span class="u">₽</span>
+    {{ if .services }}
+      {{ range .services }}
+      <div class="service-row">
+        <section class="service-card">
+          <img class="icon" src="{{ .Service.ImageURL }}" alt="{{ .Service.Title }}">
+          <div class="body">
+            <h3>{{ .Service.Title }}</h3>
+            {{ if .Service.Description }}<p class="desc">{{ .Service.Description }}</p>{{ end }}
+            <div class="inputs">
+              <div class="field">
+                <label>Расход</label>
+                <input type="text" value="{{ printf "%.2f" .Quantity }}" readonly>
+                <label>{{ .Service.Unit }}</label>
+              </div>
+              <div class="field">
+                <label>Тариф</label>
+                <input type="text" value="{{ printf "%.2f" .TariffSnapshot }}" readonly>
+                <span class="u">₽</span>
+              </div>
+              <div class="field">
+                <label>Итого</label>
+                <input type="text" value="{{ printf "%.2f" .TotalLine }}" readonly>
+                <span class="u">₽</span>
+              </div>
             </div>
-            <div class="field"><label>Итого</label><input type="text" value = "{{.Total}}"><span class="u">₽</span></div>
           </div>
-        </div>
-      </section>
-
-      <!-- Кнопка-заглушка удаления (вне карточки, справа по центру) -->
-      <button type="button" class="delete-btn" aria-label="Удалить" disabled>
-        <img src="/static/img/trash.svg" alt="">
-      </button>
-    </div>
+        </section>
+        <button type="button" class="delete-btn" aria-label="Удалить" disabled>
+          <img src="/static/img/trash.svg" alt="">
+        </button>
+      </div>
+      {{ end }}
+    {{ else }}
+      <p>В вашей текущей заявке пока нет услуг.</p>
     {{ end }}
 
-    <!-- Итого — без «карточки» вокруг -->
-    <div class="total-card">
-      <label for="total">К оплате:</label>
-      <input id="total" type="text" value="{{.total}}"><span>₽</span>
+    <!-- ВАЖНО: этот блок должен быть ВНУТРИ контейнера, а не в else ниже -->
+    <div class="footer-bar">
+      <div class="pay">
+        <label for="total">К оплате:</label>
+        <input id="total" type="text" value="{{ printf "%.2f" .total }}" readonly>
+        <span>₽</span>
+      </div>
+
+      {{ if .reqID }}
+      <form method="post" action="/cart/delete" class="delete-request-form">
+        <input type="hidden" name="request_id" value="{{ .reqID }}">
+        <button type="submit" class="btn-danger">Удалить заявку</button>
+      </form>
+      {{ end }}
     </div>
+
   </div>
 </main>
 
@@ -61,7 +80,6 @@
 {{ else }}
 <button class="fab disabled" disabled>
   <img src="/static/img/cart_new.png" alt="К заявке">
-  
 </button>
 {{ end }}
 </body>

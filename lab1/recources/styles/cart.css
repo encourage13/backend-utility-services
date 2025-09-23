@@ -194,3 +194,115 @@ body {
     box-shadow: none;
     transform: none;
   }
+
+/* контейнер: "К оплате" + кнопка удаления — ОДНА ЛИНИЯ */
+.footer-bar{
+    display:flex;
+    align-items:center;
+    gap:16px;
+    margin-top:16px;
+  }
+  
+  /* группируем подпись и поле итога */
+  .footer-bar .pay{
+    display:flex;
+    align-items:center;
+    gap:8px;
+  }
+  
+  /* чтобы форма не имела внешних отступов и не ломала строку */
+  .delete-request-form{ margin:0; }
+  
+  /* красная кнопка удаления */
+  .btn-danger{
+    background:#e53935;
+    color:#fff;
+    border:none;
+    padding:10px 16px;
+    border-radius:8px;
+    cursor:pointer;
+    box-shadow:0 1px 2px rgba(0,0,0,.08);
+    transition:background .15s ease, transform .05s ease;
+  }
+  .btn-danger:hover{ background:#d32f2f; }
+  .btn-danger:active{ transform:translateY(1px); }
+  /* описание под заголовком */
+.service-card .desc{
+    margin: 6px 0 12px;
+    color: #5b6574;
+    line-height: 1.35;
+  }
+  
+  /* "К оплате" + "Удалить заявку" — в одну линию */
+  .footer-bar{
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin: 16px 0 32px;
+  }
+  
+  /* группа с суммой */
+  .footer-bar .pay{
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .footer-bar #total{
+    width: 120px;
+    text-align: right;
+  }
+  
+  /* форма удаления не должна ломать строку */
+  .delete-request-form{
+    margin-left: auto;  /* уезжает вправо */
+    margin-top: 0;
+    margin-bottom: 0;
+  }
+  
+  /* красная кнопка удаления */
+  .btn-danger{
+    background: #e53935;
+    color: #fff;
+    border: none;
+    padding: 10px 16px;
+    border-radius: 8px;
+    cursor: pointer;
+    box-shadow: 0 1px 2px rgba(0,0,0,.08);
+    transition: background .15s ease, transform .05s ease;
+  }
+  .btn-danger:hover{ background:#d32f2f; }
+  .btn-danger:active{ transform: translateY(1px); }
+  /* --- стиль для "К оплате" (без внешнего контейнера) --- */
+.footer-bar .pay {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 18px;
+    font-weight: 600;
+  }
+  
+  .footer-bar .pay label {
+    font-weight: 600;
+    font-size: 16px;
+    color: #333;
+  }
+  
+  .footer-bar .pay input {
+    width: 120px;
+    height: 38px;
+    border: 1px solid #cfd5db;
+    border-radius: 6px;
+    padding: 0 8px;
+    font-size: 16px;
+    text-align: right;
+    background: #f9fbfc;
+    font-weight: 600;
+  }
+  
+  .footer-bar .pay span {
+    font-weight: 700;
+    font-size: 18px;
+    color: #111;
+  }
+  
+  
