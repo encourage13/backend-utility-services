@@ -1,4 +1,4 @@
-/* базовое */
+
 * { box-sizing: border-box; }
 body {
   margin: 0;
@@ -33,7 +33,7 @@ body {
   font-weight: 700;
 }
 
-/* Адрес — как поле поиска (680px) */
+
 .address-card {
   width: 680px;
   max-width: 100%;
@@ -49,9 +49,9 @@ body {
   outline: 0;
 }
 
-/* Ряд: карточка + кнопка удаления справа */
+
 .service-row {
-  width: 1200px;              /* шире, чтобы влезли три поля */
+  width: 1200px;             
   max-width: 100%;
   margin: 0 auto 24px;
   display: flex;
@@ -60,7 +60,7 @@ body {
   gap: 16px;
 }
 
-/* Карточка услуги */
+
 .service-card {
   width: 940px;
   max-width: 100%;
@@ -89,17 +89,15 @@ body {
   font-size: 16px;
 }
 
-/* Поля внутри карточки */
 .inputs {
   display: flex;
   align-items: center;
-  gap: 28px;              /* расстояние между полями */
-  flex-wrap: nowrap;      /* запрет переноса */
+  gap: 28px;             
+  flex-wrap: nowrap;     
 }
 .field {
   display: flex;
-  grid-template-columns: auto 140px auto; /* метка — инпут — единица */
-  align-items: center;
+  grid-template-columns: auto 140px auto; 
   column-gap: 6px;
   white-space: nowrap;
 }
@@ -117,7 +115,6 @@ body {
 }
 .u { color: #222; }
 
-/* Кнопка удаления */
 .delete-btn {
   background: none;
   border: 0;
@@ -135,7 +132,6 @@ body {
   object-fit: contain;
 }
 
-/* Итого — без карточки */
 .total-card {
   width: 680px;
   max-width: 100%;
@@ -155,7 +151,7 @@ body {
   text-align: center;
 }
 
-/* Кошелёк */
+
 .fab {
   position: fixed;
   left: 20px;
@@ -194,115 +190,140 @@ body {
     box-shadow: none;
     transform: none;
   }
-
-/* контейнер: "К оплате" + кнопка удаления — ОДНА ЛИНИЯ */
-.footer-bar{
-    display:flex;
-    align-items:center;
-    gap:16px;
-    margin-top:16px;
+  .service {
+    display: grid;
+    grid-template-columns: 88px 1fr auto;
+    gap: 16px;
+    align-items: center;
+    padding: 16px;
+    background: #fff;
+    border-radius: 14px;
+    box-shadow: 0 2px 10px rgba(0,0,0,.06);
+    margin-bottom: 16px;
   }
   
-  /* группируем подпись и поле итога */
-  .footer-bar .pay{
-    display:flex;
-    align-items:center;
-    gap:8px;
+  .service .icon {
+    width: 88px;
+    height: 88px;
+    display: grid;
+    place-items: center;
   }
   
-  /* чтобы форма не имела внешних отступов и не ломала строку */
-  .delete-request-form{ margin:0; }
-  
-  /* красная кнопка удаления */
-  .btn-danger{
-    background:#e53935;
-    color:#fff;
-    border:none;
-    padding:10px 16px;
-    border-radius:8px;
-    cursor:pointer;
-    box-shadow:0 1px 2px rgba(0,0,0,.08);
-    transition:background .15s ease, transform .05s ease;
-  }
-  .btn-danger:hover{ background:#d32f2f; }
-  .btn-danger:active{ transform:translateY(1px); }
-  /* описание под заголовком */
-.service-card .desc{
-    margin: 6px 0 12px;
-    color: #5b6574;
-    line-height: 1.35;
+  .service .icon img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
   }
   
-  /* "К оплате" + "Удалить заявку" — в одну линию */
-  .footer-bar{
+  .service .box h3 {
+    margin: 0 0 8px;
+    font-size: 20px;
+  }
+  
+  .service .box p {
+    margin: 0 0 12px;
+    color: #555;
+  }
+  
+  .service .actions {
+    display: grid;
+    place-items: center;
+    padding: 0 8px;
+  }
+  
+  .trash {
+    background: none;
+    border: 0;
+    cursor: pointer;
+    font-size: 0;
+  }
+  
+  .trash::before {
+    content: "🗑️";
+    font-size: 28px;
+    line-height: 1;
+  }
+  
+  /* Горизонтальная линия полей */
+  .fields {
     display: flex;
     align-items: center;
-    gap: 16px;
-    margin: 16px 0 32px;
+    gap: 12px;
+    flex-wrap: wrap;
   }
   
-  /* группа с суммой */
-  .footer-bar .pay{
+  .field {
     display: flex;
     align-items: center;
     gap: 8px;
   }
-  .footer-bar #total{
-    width: 120px;
-    text-align: right;
+  
+  .field label {
+    font-weight: 600;
+    white-space: nowrap;
   }
   
-  /* форма удаления не должна ломать строку */
-  .delete-request-form{
-    margin-left: auto;  /* уезжает вправо */
-    margin-top: 0;
-    margin-bottom: 0;
-  }
-  
-  /* красная кнопка удаления */
-  .btn-danger{
-    background: #e53935;
-    color: #fff;
-    border: none;
-    padding: 10px 16px;
+  .field input[type="number"],
+  .field input[type="text"] {
+    height: 34px;
+    padding: 6px 10px;
+    border: 1px solid #ddd;
     border-radius: 8px;
-    cursor: pointer;
-    box-shadow: 0 1px 2px rgba(0,0,0,.08);
-    transition: background .15s ease, transform .05s ease;
-  }
-  .btn-danger:hover{ background:#d32f2f; }
-  .btn-danger:active{ transform: translateY(1px); }
-  /* --- стиль для "К оплате" (без внешнего контейнера) --- */
-.footer-bar .pay {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    font-size: 18px;
-    font-weight: 600;
+    min-width: 80px;
   }
   
-  .footer-bar .pay label {
-    font-weight: 600;
-    font-size: 16px;
-    color: #333;
+  .unit,
+  .currency {
+    white-space: nowrap;
+    color: #666;
   }
   
-  .footer-bar .pay input {
-    width: 120px;
-    height: 38px;
-    border: 1px solid #cfd5db;
-    border-radius: 6px;
-    padding: 0 8px;
-    font-size: 16px;
+  .value {
+    display: inline-block;
+    min-width: 90px;
+    padding: 6px 10px;
+    background: #f6f7f8;
+    border-radius: 8px;
     text-align: right;
-    background: #f9fbfc;
-    font-weight: 600;
   }
   
-  .footer-bar .pay span {
-    font-weight: 700;
+  .total-wrap {
+    margin-top: 24px;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 12px;
     font-size: 18px;
-    color: #111;
   }
   
+  .total-amount {
+    font-weight: 700;
+    font-size: 22px;
+  }
+  
+  /* Контейнер и адрес */
+  .container {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 24px;
+  }
+  
+  .h1 {
+    text-align: center;
+    margin: 16px 0 20px;
+  }
+  
+  .address {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 16px;
+  }
+  
+  .address input {
+    width: min(560px, 100%);
+    height: 38px;
+    padding: 8px 12px;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+  }
   

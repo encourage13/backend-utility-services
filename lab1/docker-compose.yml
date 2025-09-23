@@ -1,4 +1,4 @@
-version: "3.9"
+version: "3.8"
 services:
   minio:
     image: minio/minio:latest
@@ -12,61 +12,5 @@ services:
       - "9001:9001"   # MinIO Console
     volumes:
       - minio-data:/data
-  postgres:
-    image: postgres:15.0
-    command:
-      - "postgres"
-      - "-c" 
-      - "max_connections=50"
-      - "-c" 
-      - "shared_buffers=1GB"
-      - "-c" 
-      - "effective_cache_size=4GB"
-      - "-c" 
-      - "work_mem=16MB"
-      - "-c" 
-      - "maintenance_work_mem=512MB"
-      - "-c" 
-      - "random_page_cost=1.1"
-      - "-c" 
-      - "temp_file_limit=10GB"
-      - "-c" 
-      - "log_min_duration_statement=200ms"
-      - "-c" 
-      - "idle_in_transaction_session_timeout=10s"
-      - "-c" 
-      - "lock_timeout=1s"
-      - "-c" 
-      - "statement_timeout=60s"
-      - "-c" 
-      - "shared_preload_libraries=pg_stat_statements"
-      - "-c" 
-      - "pg_stat_statements.max=10000"
-      - "-c" 
-      - "pg_stat_statements.track=all"
-    environment:
-      POSTGRES_DB: "mydb"
-      POSTGRES_USER: "root"
-      POSTGRES_PASSWORD: "mydbpass"
-      PGDATA: "/var/lib/postgresql/data"     # используем путь по умолчанию
-    ports:
-      - "5433:5432"                          # чтобы не конфликтовать с локальным postgres
-    volumes:
-      - ./InitDatabase:/docker-entrypoint-initdb.d:ro
-      - pgdata:/var/lib/postgresql/data      # именованный том для данных
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U root -d mydb"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-      start_period: 10s
-    restart: unless-stopped 
-  adminer:
-    image: adminer:latest
-    ports:
-      - "8081:8080"
-    depends_on:
-      - postgres
 volumes:
   minio-data:
-  pgdata:

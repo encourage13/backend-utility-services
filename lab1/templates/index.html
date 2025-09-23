@@ -25,7 +25,7 @@
         <div class="media"><img src="{{ .ImageURL }}" alt="{{ .Title }}"></div>
         <div class="body">
           <h3>{{ .Title }}</h3>
-          <a class="btn" href="/services/{{ .ID }}">Подробнее</a>
+          <a class="btn" href="/service/{{ .ID }}">Подробнее</a>
         </div>
       </article>
       {{ end }}
@@ -34,13 +34,13 @@
 </main>
 
 {{ if gt .count 0 }}
-<button class="fab" onclick="window.location.href='/cart'">
-  <img src="/static/img/cart_new.png" alt="К заявке">
+<button class="fab" onclick="window.location.href='/cart/1'">
+  <img src="http://localhost:9000/kartinki/cart_new.png" alt="К заявке">
   <span class="count">{{ .count }}</span>
 </button>
 {{ else }}
 <button class="fab disabled" disabled>
-  <img src="/static/img/cart_new.png" alt="К заявке">
+  <img src="http://localhost:9000/kartinki/cart_new.png" alt="К заявке">
   
 </button>
 {{ end }}
