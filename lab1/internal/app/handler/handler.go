@@ -8,82 +8,104 @@ import (
 	"lab1/internal/app/repository"
 
 	"github.com/gin-gonic/gin"
+	"github.com/sirupsen/logrus"
 )
 
 type Handler struct {
 	Repo *repository.Repository
 }
 
-func New(repo *repository.Repository) *Handler {
-	return &Handler{Repo: repo}
+func New(r *repository.Repository) *Handler {
+	return &Handler{Repo: r}
 }
 
-func (h *Handler) Index(c *gin.Context) {
-	search_service := strings.TrimSpace(c.Query("search_service"))
+type PageData struct {
+	Services      []repository.UtilityService
+	SearchQuery   string
+	Service       repository.UtilityService
+	CartID        int
+	CartItems     []repository.SingleUtilityApplication
+	CartItemCount int
+	Total         float32
+}
 
-	services := h.Repo.ListServices()
+func (h *Handler) GetUtilities(c *gin.Context) {
+	q := strings.TrimSpace(c.Query("searchUtilities"))
 
-	if search_service != "" {
-		qLower := strings.ToLower(search_service)
-		filtered := make([]repository.Service, 0, len(services))
-		for _, s := range services {
-			if strings.Contains(strings.ToLower(s.Title), qLower) ||
-				strings.Contains(strings.ToLower(s.Description), qLower) {
-				filtered = append(filtered, s)
-			}
-		}
-		services = filtered
+	var services []repository.UtilityService
+	var err error
+	if q == "" {
+		services, err = h.Repo.GetUtilityServices()
+	} else {
+		services, err = h.Repo.SearchUtilityServices(q)
+	}
+	if err != nil {
+		logrus.Error(err)
 	}
 
-	count := h.Repo.CartCount()
+	cart, _ := h.Repo.GetUtility__Application(1)
 
-	c.HTML(http.StatusOK, "index.html", gin.H{
-		"cards":          services,
-		"count":          count,
-		"search_service": search_service,
+	c.HTML(http.StatusOK, "list_of_utilities.html", gin.H{
+		"data": PageData{
+			Services:      services,
+			SearchQuery:   q,
+			CartID:        1,
+			CartItems:     cart.Services,
+			CartItemCount: len(cart.Services),
+			Total:         cart.TotalCost,
+		},
 	})
 }
 
-func (h *Handler) Service(c *gin.Context) {
+func (h *Handler) GetUtility(c *gin.Context) {
 	idStr := c.Param("id")
 	id, err := strconv.Atoi(idStr)
 	if err != nil {
 		c.String(http.StatusBadRequest, "invalid id")
 		return
 	}
-
-	s, ok := h.Repo.GetServiceByID(id)
-	if !ok {
+	svc, err := h.Repo.GetUtilityServiceByID(id)
+	if err != nil {
 		c.String(http.StatusNotFound, "not found")
 		return
 	}
 
-	c.HTML(http.StatusOK, "service.html", gin.H{
-		"title":  s.Title,
-		"desc":   s.Description,
-		"img":    s.ImageURL,
-		"count":  h.Repo.CartCount(),
-		"tariff": s.Tariff,
+	cart, _ := h.Repo.GetUtility__Application(1)
+
+	c.HTML(http.StatusOK, "utility.html", gin.H{
+		"data": PageData{
+			Service:       svc,
+			CartID:        1,
+			CartItems:     cart.Services,
+			CartItemCount: len(cart.Services),
+			Total:         cart.TotalCost,
+		},
 	})
 }
 
-func (h *Handler) Cart(c *gin.Context) {
-	reqID := c.Param("id")
-	if reqID == "" {
-		reqID = "1"
+func (h *Handler) GetUtilitiesApplication(c *gin.Context) {
+	cartIDStr := strings.TrimSpace(c.Param("id"))
+	if cartIDStr == "" {
+		cartIDStr = "1"
+	}
+	cartID, err := strconv.Atoi(cartIDStr)
+	if err != nil {
+		c.String(http.StatusBadRequest, "invalid application id")
+		return
 	}
 
-	services := h.Repo.ListCartServices()
-
-	var grandTotal float32
-	for _, s := range services {
-		grandTotal += s.Total
+	cart, err := h.Repo.GetUtility__Application(cartID)
+	if err != nil {
+		c.String(http.StatusNotFound, "application not found")
+		return
 	}
 
-	c.HTML(http.StatusOK, "cart.html", gin.H{
-		"services":   services,
-		"count":      h.Repo.CartCount(),
-		"total":      grandTotal,
-		"request_id": reqID,
+	c.HTML(http.StatusOK, "utilities_application.html", gin.H{
+		"data": PageData{
+			CartID:        cartID,
+			CartItems:     cart.Services,
+			CartItemCount: len(cart.Services),
+			Total:         cart.TotalCost,
+		},
 	})
 }

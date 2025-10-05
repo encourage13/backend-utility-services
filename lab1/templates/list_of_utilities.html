@@ -4,11 +4,11 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>Коммунальные услуги</title>
-  <link rel="stylesheet" href="/static/styles/index.css">
+  <link rel="stylesheet" href="/static/styles/list_of_utilities.css">
 </head>
 <body>
 <header class="header">
-  <div class="inner"><a class="brand" href="/">mos.ru</a></div>
+  <div class="inner"><a class="brand" href="/utilities">mos.ru</a></div>
 </header>
 
 <main>
@@ -16,16 +16,18 @@
     <h1 class="h1">Коммунальные услуги</h1>
 
     <div class="search-wrap">
-      <form class="search" method="get" action="/"><input type="search_service" name="search_service" placeholder="Поиск услуг" value="{{ .search_service }}"></form>
+      <form class="search" method="get" action="/">
+        <input type="search" name="searchUtilities" placeholder="Поиск услуг" value="{{ .data.SearchQuery }}">
+      </form>
     </div>
 
     <section class="grid">
-      {{ range .cards }}
+      {{ range .data.Services }}
       <article class="card">
         <div class="media"><img src="{{ .ImageURL }}" alt="{{ .Title }}"></div>
         <div class="body">
           <h3>{{ .Title }}</h3>
-          <a class="btn" href="/service/{{ .ID }}">Подробнее</a>
+          <a class="btn" href="/utilities/{{ .ID }}">Подробнее</a>
         </div>
       </article>
       {{ end }}
@@ -33,15 +35,14 @@
   </div>
 </main>
 
-{{ if gt .count 0 }}
-<button class="fab" onclick="window.location.href='/cart/1'">
+{{ if gt .data.CartItemCount 0 }}
+<button class="fab" onclick="window.location.href='/utilities_application/{{ .data.CartID }}'">
   <img src="http://localhost:9000/kartinki/cart_new.png" alt="К заявке">
-  <span class="count">{{ .count }}</span>
+  <span class="count">{{ .data.CartItemCount }}</span>
 </button>
 {{ else }}
 <button class="fab disabled" disabled>
   <img src="http://localhost:9000/kartinki/cart_new.png" alt="К заявке">
-  
 </button>
 {{ end }}
 </body>

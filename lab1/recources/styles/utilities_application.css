@@ -90,6 +90,7 @@ body {
 }
 
 .inputs {
+  margin-top: 10px;
   display: flex;
   align-items: center;
   gap: 28px;             
@@ -327,3 +328,52 @@ body {
     border-radius: 10px;
   }
   
+  .card .btn{
+    display:inline-block;
+    padding:10px 16px;
+    background:#dbe8ff;
+    color:#0b51c5;
+    border-radius:10px;
+    text-decoration:none;
+    font-weight:600;
+    transition:
+      transform .25s ease,
+      background-color .25s ease,
+      color .25s ease,
+      box-shadow .25s ease;
+    will-change: transform;
+  }
+  
+  .body.btn{display:block;width:160px ;padding:10px;margin-bottom: 10px ;border-radius:10px;text-align:center;background:#dbe8ff;color:#0b51c5;text-decoration:none}
+  .body .btn{
+    display:inline-block;
+    padding:10px 16px;
+    background:#dbe8ff;
+    color:#0b51c5;
+    border-radius:10px;
+    text-decoration:none;
+    font-weight:600;
+    transition:
+      transform .25s ease,
+      background-color .25s ease,
+      color .25s ease,
+      box-shadow .25s ease;
+    will-change: transform;
+  }
+  .body .btn:hover{
+    background:#0b51c5;
+    color:#fff;
+    transform: translateY(-2px) scale(1.04);
+    box-shadow:0 10px 22px rgba(11,81,197,.25);
+  }
+  
+  .body .btn:active{
+    transform: translateY(0) scale(1.0);
+    box-shadow:0 4px 12px rgba(11,81,197,.2);
+  }
+  
+  .body.btn:focus-visible{
+    outline:3px solid rgba(11,81,197,.35);
+    outline-offset:2px;
+    border-radius:12px;
+  }

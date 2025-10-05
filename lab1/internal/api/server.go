@@ -16,10 +16,12 @@ func Start() {
 	r.LoadHTMLGlob("../../templates/*")
 	r.Static("/static", "../../recources")
 
-	r.GET("/", h.Index)
-	r.GET("/service/:id", h.Service)
-	r.GET("/cart", h.Cart)
-	r.GET("/cart/:id", h.Cart)
+	r.GET("/", h.GetUtilities)
+
+	r.GET("/utilities", h.GetUtilities)
+	r.GET("/utilities/:id", h.GetUtility)
+	r.GET("/utilities_application", h.GetUtilitiesApplication)
+	r.GET("/utilities_application/:id", h.GetUtilitiesApplication)
 
 	addr := ":8080"
 	logrus.Infof("listening on %s", addr)
