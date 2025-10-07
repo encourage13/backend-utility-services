@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Коммунальные услуги</title>
+  <link rel="stylesheet" href="/static/styles/list_of_utilities.css">
+</head>
+<body>
+<header class="header">
+  <div class="inner"><a class="brand" href="/utilities">mos.ru</a></div>
+</header>
+
+<main>
+  <div class="container index">
+    <h1 class="h1">Коммунальные услуги</h1>
+
+    <div class="search-wrap">
+      <form class="search" method="get" action="/">
+        <input type="search" name="searchUtilities" placeholder="Поиск услуг" value="{{ .data.SearchQuery }}">
+      </form>
+    </div>
+
+    <section class="grid">
+      {{ range .data.Services }}
+      <article class="card">
+        <div class="media"><img src="{{ .ImageURL }}" alt="{{ .Title }}"></div>
+        <div class="body">
+          <h3>{{ .Title }}</h3>
+          <div class="actions">
+            <a class="btn" href="/utilities/{{ .ID }}">Подробнее</a>
+          
+            <form method="POST" action="/utilities_application/add">
+              <input type="hidden" name="service_id" value="{{ .ID }}">
+              <button type="submit" class="btn btn--green">Добавить</button>
+            </form>
+          </div>
+        </div>
+        
+      </article>
+      {{ end }}
+    </section>
+  </div>
+</main>
+
+{{ if gt .data.CartItemCount 0 }}
+<button class="fab" onclick="window.location.href='/utilities_application/{{ .data.CartID }}'">
+  <img src="http://localhost:9000/kartinki/cart_new.png" alt="К заявке">
+  <span class="count">{{ .data.CartItemCount }}</span>
+</button>
+{{ else }}
+<button class="fab disabled" disabled>
+  <img src="http://localhost:9000/kartinki/cart_new.png" alt="К заявке">
+</button>
+{{ end }}
+</body>
+</html>
