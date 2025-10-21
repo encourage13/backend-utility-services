@@ -15,7 +15,7 @@
 
     
     <section class="address-card">
-      <input type="text" placeholder="Введите адрес">
+      <input type="text" placeholder="Введите адрес" value="{{ .data.Address }}">
     </section>
 
    
@@ -33,7 +33,12 @@
 
             <div class="field">
               <label>Тариф</label>
-              <input type="text" value="{{ .Service.Tariff }}"><span class="u">₽</span>
+              {{if .CustomTariff}}
+                <input type="text" value="{{ .CustomTariff }}"><span class="u">₽</span>
+              {{else}}
+                <input type="text" value="{{ .Service.Tariff }}"><span class="u">₽</span>
+              {{end}} 
+              
             </div>
 
             <div class="field"><label>Расход</label><input type="text" value="{{ .Quantity }}"><label>{{ .Service.Unit }}</label></div>
@@ -44,9 +49,7 @@
       </section>
 
       
-      <button type="button" class="delete-btn" aria-label="Удалить" disabled>
-        <img src="/static/img/trash.svg" alt="">
-      </button>
+      
     </div>
     {{ end }}
 
@@ -58,8 +61,7 @@
       </div>
 
       <div class="page-actions">
-        <form method="POST" action="/utilities_application/delete"
-              onsubmit="return confirm('Удалить текущую заявку целиком?');">
+        <form method="POST" action="/utilities_application/delete">
           <input type="hidden" name="application_id" value="{{ .data.CartID }}">
           <button type="submit" class="btn btn--danger">Удалить заявку</button>
         </form>
@@ -69,7 +71,16 @@
 
   </div>
 </main>
-
+{{ if gt .data.CartItemCount 0 }}
+<button class="fab" onclick="window.location.href='/utilities_application/{{ .data.CartID }}'">
+  <img src="http://localhost:9000/kartinki/cart_new.png" alt="К заявке">
+  <span class="count">{{ .data.CartItemCount }}</span>
+</button>
+{{ else }}
+<button class="fab disabled" disabled>
+  <img src="http://localhost:9000/kartinki/cart_new.png" alt="К заявке">
+</button>
+{{ end }}
 
 </body>
 </html>

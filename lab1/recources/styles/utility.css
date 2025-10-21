@@ -1,0 +1,28 @@
+*{box-sizing:border-box} body{margin:0;font-family:Arial,Helvetica,sans-serif;background:#eef2f5;color:#111}
+.header{background:#fff;border-bottom:1px solid #cfd5db}
+.header .inner{max-width:1200px;margin:0 auto;padding:14px 16px}
+.header .brand{color:#e20000;text-decoration:none;font-weight:700;font-size:24px}
+.container.service{max-width:1200px;margin:0 auto;padding:24px}
+.h1{margin:0 0 32px;text-align:center;font-size:32px;font-weight:700}
+
+
+.row{display:grid;grid-template-columns:360px 460px;gap:36px;justify-content:center;align-items:start;margin-bottom:24px}
+.panel{background:#fff;border:1px solid #cfd5db;border-radius:10px;box-shadow:0 2px 0 #cfd5db}
+.panel.media{height:260px;display:flex;align-items:center;justify-content:center}
+.panel.media img{max-width:90%;max-height:90%;object-fit:contain}
+.panel.text{height:260px;padding:20px;display:flex;align-items:center;font-size:18px}
+
+.tariff{margin:28px 0 0;text-align:center}
+.tariff label{margin-right:14px;font-size:18px}
+.tariff input{width:92px;height:40px;text-align:center;border:1px solid #cfd5db;border-radius:8px}
+
+
+.fab{position:fixed;left:20px;bottom:20px;width:64px;height:64px;border:1px solid #cfd5db;border-radius:50%;background:#fff;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 6px rgba(0,0,0,.15)}
+.fab img{width:36px;height:36px}
+.fab .count{position:absolute;right:-6px;top:-6px;width:22px;height:22px;border-radius:50%;background:#e20000;color:#fff;display:flex;align-items:center;justify-content:center;font-size:13px}
+.fab.disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    box-shadow: none;
+    transform: none;
+  }

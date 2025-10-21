@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>{{ .data.Service.Title }} — подробности</title>
+  <link rel="stylesheet" href="/static/styles/utility.css">
+</head>
+<body>
+<header class="header"><div class="inner"><a class="brand" href="/utilities">mos.ru</a></div></header>
+
+<main>
+  <div class="container service">
+    <h1 class="h1">{{ .data.Service.Title }}</h1>
+
+    <div class="row">
+      <div class="panel media"><img src="{{ .data.Service.ImageURL }}" alt="{{ .data.Service.Title }}"></div>
+      <div class="panel text">{{ .data.Service.Description }}</div>
+    </div>
+
+    <div class="tariff">
+      <label for="tariff">Тариф</label>
+      <input id="tariff" type="text" value="{{ .data.Service.Tariff }}">
+      <span class="u">₽ / {{ .data.Service.Unit }}</span>
+    </div>
+  </div>
+</main>
+
+{{ if gt .data.CartItemCount 0 }}
+<button class="fab" onclick="window.location.href='/utilities_application/{{ .data.CartID }}'">
+  <img src="http://localhost:9000/kartinki/cart_new.png" alt="К заявке">
+  <span class="count">{{ .data.CartItemCount }}</span>
+</button>
+{{ else }}
+<button class="fab disabled" disabled>
+  <img src="http://localhost:9000/kartinki/cart_new.png" alt="К заявке">
+</button>
+{{ end }}
+</body>
+</html>

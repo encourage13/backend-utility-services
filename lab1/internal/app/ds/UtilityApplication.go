@@ -7,6 +7,7 @@ type UtilityApplication struct {
 	UserID       uint      `gorm:"not null;index"`
 	Status       string    `gorm:"size:64;default:DRAFT;not null"`
 	TotalCost    float32   `gorm:"not null;default:0"`
+	Address      string    `gorm:"size:512;default:null"`
 	DateCreated  time.Time `gorm:"autoCreateTime;not null"`
 	DateFormed   time.Time `gorm:"default:null"`
 	DateAccepted time.Time `gorm:"default:null"`
