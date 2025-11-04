@@ -1,5 +1,10 @@
 package handler
 
+// @title BITOP
+// @version 1.0
+// @description Bmstu Open IT Platform
+// @host 127.0.0.1:8080
+// @BasePath /
 import (
 	"lab1/internal/app/ds"
 	"net/http"
@@ -21,8 +26,8 @@ type UtilitiesPageData struct {
 	Address       string
 }
 
-func (h *Handler) GetUtilities(ctx *gin.Context) {
-	q := strings.TrimSpace(ctx.Query("searchUtilities"))
+func (h *Handler) GetUtilities(gCtx *gin.Context) {
+	q := strings.TrimSpace(gCtx.Query("searchUtilities"))
 
 	var services []ds.UtilityService
 	var err error
@@ -35,18 +40,18 @@ func (h *Handler) GetUtilities(ctx *gin.Context) {
 		log.Error(err)
 		services = []ds.UtilityService{}
 	}
-
-	userID := h.GetCurrentUserID()
-	app, err := h.Repository.CreateOrGetUtilityApplication(userID)
+	userID := uint(1)
+	//userID := h.GetCurrentUserID(gCtx)                             // ИЗМЕНЕНО
+	app, err := h.Repository.CreateOrGetUtilityApplication(userID) // ИЗМЕНЕНО
 	if err == nil {
 		app, err = h.Repository.GetUtilityApplicationByID(app.ID)
 	}
 	if err != nil {
-		h.errorHandler(ctx, http.StatusInternalServerError, err)
+		h.errorHandler(gCtx, http.StatusInternalServerError, err)
 		return
 	}
 
-	ctx.HTML(http.StatusOK, "list_of_utilities.html", gin.H{
+	gCtx.HTML(http.StatusOK, "list_of_utilities.html", gin.H{
 		"data": UtilitiesPageData{
 			Services:      services,
 			SearchQuery:   q,
@@ -58,26 +63,23 @@ func (h *Handler) GetUtilities(ctx *gin.Context) {
 	})
 }
 
-func (h *Handler) GetUtility(ctx *gin.Context) {
-	idStr := ctx.Param("id")
+func (h *Handler) GetUtility(gCtx *gin.Context) {
+	idStr := gCtx.Param("id")
 	raw, err := strconv.ParseUint(idStr, 10, 32)
 	if err != nil || raw == 0 {
-
-		ctx.Redirect(http.StatusFound, "/utilities")
+		gCtx.Redirect(http.StatusFound, "/utilities")
 		return
 	}
 
 	svc, err := h.Repository.GetUtilityServiceByID(uint32(raw))
 	if err != nil {
-
-		ctx.Redirect(http.StatusFound, "/utilities")
+		gCtx.Redirect(http.StatusFound, "/utilities")
 		return
 	}
 
-	userID := h.GetCurrentUserID()
-	app, err := h.Repository.CreateOrGetUtilityApplication(userID)
+	userID := uint(1)                                              // ИЗМЕНЕНО
+	app, err := h.Repository.CreateOrGetUtilityApplication(userID) // ИЗМЕНЕНО
 	if err != nil {
-
 		app = ds.UtilityApplication{}
 	} else {
 		app, err = h.Repository.GetUtilityApplicationByID(app.ID)
@@ -86,7 +88,7 @@ func (h *Handler) GetUtility(ctx *gin.Context) {
 		}
 	}
 
-	ctx.HTML(http.StatusOK, "utility.html", gin.H{
+	gCtx.HTML(http.StatusOK, "utility.html", gin.H{
 		"data": UtilitiesPageData{
 			Service:       svc,
 			CartID:        app.ID,
@@ -97,12 +99,22 @@ func (h *Handler) GetUtility(ctx *gin.Context) {
 	})
 }
 
-func (h *Handler) GetUtilityServicesAPI(ctx *gin.Context) {
-	title := ctx.Query("title")
+// GetUtilityServicesAPI godoc
+// @Summary Get utility services
+// @Description Get paginated list of utility services
+// @Tags utilities
+// @Accept json
+// @Produce json
+// @Param title query string false "Filter by title"
+// @Success 200 {object} ds.PaginatedResponse
+// @Failure 500 {object} ds.ErrorResponse
+// @Router /api/utilities [get]
+func (h *Handler) GetUtilityServicesAPI(gCtx *gin.Context) {
+	title := gCtx.Query("title")
 
 	services, total, err := h.Repository.GetUtilityServicesFiltered(title)
 	if err != nil {
-		h.errorHandler(ctx, http.StatusInternalServerError, err)
+		h.errorHandler(gCtx, http.StatusInternalServerError, err)
 		return
 	}
 
@@ -122,22 +134,33 @@ func (h *Handler) GetUtilityServicesAPI(ctx *gin.Context) {
 		})
 	}
 
-	ctx.JSON(http.StatusOK, ds.PaginatedResponse{
+	gCtx.JSON(http.StatusOK, ds.PaginatedResponse{
 		Items: serviceDTOs,
 		Total: total,
 	})
 }
 
-func (h *Handler) GetUtilityServiceAPI(ctx *gin.Context) {
-	id, err := strconv.Atoi(ctx.Param("id"))
+// GetUtilityServiceAPI godoc
+// @Summary Get utility service by ID
+// @Description Get detailed information about a utility service
+// @Tags utilities
+// @Accept json
+// @Produce json
+// @Param id path int true "Service ID"
+// @Success 200 {object} map[string]string
+// @Failure 400 {object} ds.ErrorResponse
+// @Failure 404 {object} ds.ErrorResponse
+// @Router /api/utilities/{id} [get]
+func (h *Handler) GetUtilityServiceAPI(gCtx *gin.Context) {
+	id, err := strconv.Atoi(gCtx.Param("id"))
 	if err != nil {
-		h.errorHandler(ctx, http.StatusBadRequest, err)
+		h.errorHandler(gCtx, http.StatusBadRequest, err)
 		return
 	}
 
 	service, err := h.Repository.GetUtilityServiceByID(uint32(id))
 	if err != nil {
-		h.errorHandler(ctx, http.StatusNotFound, err)
+		h.errorHandler(gCtx, http.StatusNotFound, err)
 		return
 	}
 
@@ -155,13 +178,25 @@ func (h *Handler) GetUtilityServiceAPI(ctx *gin.Context) {
 		Tariff:      service.Tariff,
 	}
 
-	ctx.JSON(http.StatusOK, serviceDTO)
+	gCtx.JSON(http.StatusOK, serviceDTO)
 }
 
-func (h *Handler) CreateUtilityService(ctx *gin.Context) {
+// CreateUtilityService godoc
+// @Summary Create utility service
+// @Description Create new utility service (Admin/Manager only)
+// @Tags utilities
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Param request body ds.UtilityServiceCreateRequest true "Service data"
+// @Success 201 {object} map[string]string
+// @Failure 400 {object} ds.ErrorResponse
+// @Failure 500 {object} ds.ErrorResponse
+// @Router /api/utilities [post]
+func (h *Handler) CreateUtilityService(gCtx *gin.Context) {
 	var req ds.UtilityServiceCreateRequest
-	if err := ctx.BindJSON(&req); err != nil {
-		h.errorHandler(ctx, http.StatusBadRequest, err)
+	if err := gCtx.BindJSON(&req); err != nil {
+		h.errorHandler(gCtx, http.StatusBadRequest, err)
 		return
 	}
 
@@ -179,7 +214,7 @@ func (h *Handler) CreateUtilityService(ctx *gin.Context) {
 	}
 
 	if err := h.Repository.CreateUtilityService(&service); err != nil {
-		h.errorHandler(ctx, http.StatusInternalServerError, err)
+		h.errorHandler(gCtx, http.StatusInternalServerError, err)
 		return
 	}
 
@@ -197,25 +232,38 @@ func (h *Handler) CreateUtilityService(ctx *gin.Context) {
 		Tariff:      service.Tariff,
 	}
 
-	ctx.JSON(http.StatusCreated, serviceDTO)
+	gCtx.JSON(http.StatusCreated, serviceDTO)
 }
 
-func (h *Handler) UpdateUtilityService(ctx *gin.Context) {
-	id, err := strconv.Atoi(ctx.Param("id"))
+// UpdateUtilityService godoc
+// @Summary Update utility service
+// @Description Update existing utility service (Admin/Manager only)
+// @Tags utilities
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Param id path int true "Service ID"
+// @Param request body ds.UtilityServiceUpdateRequest true "Service data"
+// @Success 200 {object} map[string]string
+// @Failure 400 {object} ds.ErrorResponse
+// @Failure 500 {object} ds.ErrorResponse
+// @Router /api/utilities/{id} [put]
+func (h *Handler) UpdateUtilityService(gCtx *gin.Context) {
+	id, err := strconv.Atoi(gCtx.Param("id"))
 	if err != nil {
-		h.errorHandler(ctx, http.StatusBadRequest, err)
+		h.errorHandler(gCtx, http.StatusBadRequest, err)
 		return
 	}
 
 	var req ds.UtilityServiceUpdateRequest
-	if err := ctx.BindJSON(&req); err != nil {
-		h.errorHandler(ctx, http.StatusBadRequest, err)
+	if err := gCtx.BindJSON(&req); err != nil {
+		h.errorHandler(gCtx, http.StatusBadRequest, err)
 		return
 	}
 
 	service, err := h.Repository.UpdateUtilityService(uint32(id), req)
 	if err != nil {
-		h.errorHandler(ctx, http.StatusInternalServerError, err)
+		h.errorHandler(gCtx, http.StatusInternalServerError, err)
 		return
 	}
 
@@ -233,69 +281,106 @@ func (h *Handler) UpdateUtilityService(ctx *gin.Context) {
 		Tariff:      service.Tariff,
 	}
 
-	ctx.JSON(http.StatusOK, serviceDTO)
+	gCtx.JSON(http.StatusOK, serviceDTO)
 }
 
-func (h *Handler) DeleteUtilityService(ctx *gin.Context) {
-	id, err := strconv.Atoi(ctx.Param("id"))
+// DeleteUtilityService godoc
+// @Summary Delete utility service
+// @Description Delete utility service (Admin/Manager only)
+// @Tags utilities
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Param id path int true "Service ID"
+// @Success 204 {object} map[string]string
+// @Failure 400 {object} ds.ErrorResponse
+// @Failure 500 {object} ds.ErrorResponse
+// @Router /api/utilities/{id} [delete]
+func (h *Handler) DeleteUtilityService(gCtx *gin.Context) {
+	id, err := strconv.Atoi(gCtx.Param("id"))
 	if err != nil {
-		h.errorHandler(ctx, http.StatusBadRequest, err)
+		h.errorHandler(gCtx, http.StatusBadRequest, err)
 		return
 	}
 
 	if err := h.Repository.DeleteUtilityService(uint32(id)); err != nil {
-		h.errorHandler(ctx, http.StatusInternalServerError, err)
+		h.errorHandler(gCtx, http.StatusInternalServerError, err)
 		return
 	}
 
-	ctx.JSON(http.StatusNoContent, gin.H{
+	gCtx.JSON(http.StatusNoContent, gin.H{
 		"message": "Услуга удалена",
 	})
 }
 
-func (h *Handler) UploadUtilityServiceImage(ctx *gin.Context) {
-	id, err := strconv.Atoi(ctx.Param("id"))
+// UploadUtilityServiceImage godoc
+// @Summary Upload utility service image
+// @Description Upload/replace utility service image using minio (Admin/Manager only)
+// @Tags utilities
+// @Accept multipart/form-data
+// @Produce json
+// @Security BearerAuth
+// @Param id path int true "Service ID"
+// @Param file formData file true "Image file"
+// @Success 200 {object} map[string]string
+// @Failure 400 {object} ds.ErrorResponse
+// @Failure 500 {object} ds.ErrorResponse
+// @Router /api/utilities/{id}/image [post]
+func (h *Handler) UploadUtilityServiceImage(gCtx *gin.Context) {
+	id, err := strconv.Atoi(gCtx.Param("id"))
 	if err != nil {
-		h.errorHandler(ctx, http.StatusBadRequest, err)
+		h.errorHandler(gCtx, http.StatusBadRequest, err)
 		return
 	}
 
-	file, err := ctx.FormFile("file")
+	file, err := gCtx.FormFile("file")
 	if err != nil {
-		h.errorHandler(ctx, http.StatusBadRequest, err)
+		h.errorHandler(gCtx, http.StatusBadRequest, err)
 		return
 	}
 
 	imageURL, err := h.Repository.UploadUtilityServiceImage(uint32(id), file)
 	if err != nil {
-		h.errorHandler(ctx, http.StatusInternalServerError, err)
+		h.errorHandler(gCtx, http.StatusInternalServerError, err)
 		return
 	}
 
-	ctx.JSON(http.StatusOK, gin.H{"image_url": imageURL})
+	gCtx.JSON(http.StatusOK, gin.H{"image_url": imageURL})
 }
 
-func (h *Handler) AddServiceToDraft(ctx *gin.Context) {
-	serviceID, err := strconv.Atoi(ctx.Param("service_id"))
+// AddServiceToDraft godoc
+// @Summary Add service to draft application
+// @Description Add service to draft application (application is created automatically)
+// @Tags applications
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Param service_id path int true "Service ID"
+// @Success 201 {object} ds.MessageResponse
+// @Failure 400 {object} ds.ErrorResponse
+// @Failure 500 {object} ds.ErrorResponse
+// @Router /api/applications/draft/services/{service_id} [post]
+func (h *Handler) AddServiceToDraft(gCtx *gin.Context) {
+	serviceID, err := strconv.Atoi(gCtx.Param("service_id"))
 	if err != nil {
-		h.errorHandler(ctx, http.StatusBadRequest, err)
+		h.errorHandler(gCtx, http.StatusBadRequest, err)
 		return
 	}
 
-	userID := h.GetCurrentUserID()
+	userID := h.GetCurrentUserID(gCtx) // ИЗМЕНЕНО
 
-	app, err := h.Repository.CreateOrGetUtilityApplication(userID)
+	app, err := h.Repository.CreateOrGetUtilityApplication(userID) // ИЗМЕНЕНО
 	if err != nil {
-		h.errorHandler(ctx, http.StatusInternalServerError, err)
+		h.errorHandler(gCtx, http.StatusInternalServerError, err)
 		return
 	}
 
 	if err := h.Repository.AddServiceToApplication(app.ID, uint32(serviceID), 1); err != nil {
-		h.errorHandler(ctx, http.StatusInternalServerError, err)
+		h.errorHandler(gCtx, http.StatusInternalServerError, err)
 		return
 	}
 
-	ctx.JSON(http.StatusCreated, gin.H{
+	gCtx.JSON(http.StatusCreated, gin.H{
 		"message":        "Услуга добавлена в черновик заявки",
 		"application_id": app.ID,
 	})

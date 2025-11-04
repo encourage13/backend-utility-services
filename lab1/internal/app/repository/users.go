@@ -2,18 +2,23 @@ package repository
 
 import (
 	"lab1/internal/app/ds"
-
-	"golang.org/x/crypto/bcrypt"
 )
 
-func (r *Repository) CreateUser(user *ds.User) error {
+func (r *Repository) Register(user *ds.User) error {
 	return r.db.Create(user).Error
 }
 
-func (r *Repository) GetUserByID(id uint) (ds.User, error) {
+func (r *Repository) GetUserByLogin(login string) (ds.User, error) {
 	var user ds.User
-	if err := r.db.First(&user, id).Error; err != nil {
-		return ds.User{}, err
+	err := r.db.Where("name = ?", login).First(&user).Error
+	return user, err
+}
+
+func (r *Repository) GetUserByID(id uint) (*ds.User, error) {
+	user := &ds.User{}
+	err := r.db.First(user, id).Error
+	if err != nil {
+		return nil, err
 	}
 	return user, nil
 }
@@ -22,30 +27,11 @@ func (r *Repository) UpdateUser(id uint, req ds.UserUpdateRequest) error {
 	updates := make(map[string]interface{})
 
 	if req.Login != nil {
-		updates["login"] = *req.Login
+		updates["name"] = *req.Login
 	}
 	if req.Password != nil {
-		hashedPassword, err := bcrypt.GenerateFromPassword([]byte(*req.Password), bcrypt.DefaultCost)
-		if err != nil {
-			return err
-		}
-		updates["hashed_password"] = string(hashedPassword)
-	}
-	if req.IsModerator != nil {
-		updates["is_moderator"] = *req.IsModerator
-	}
-
-	if len(updates) == 0 {
-		return nil
+		updates["pass"] = *req.Password
 	}
 
 	return r.db.Model(&ds.User{}).Where("id = ?", id).Updates(updates).Error
-}
-
-func (r *Repository) GetUserByUsername(login string) (ds.User, error) {
-	var user ds.User
-	if err := r.db.Where("login = ?", login).First(&user).Error; err != nil {
-		return ds.User{}, err
-	}
-	return user, nil
 }

@@ -1,0 +1,852 @@
+basePath: /
+definitions:
+  ds.ApplicationStatusUpdateRequest:
+    properties:
+      status:
+        description: '"FORMED" | "REJECTED" | "COMPLETED"'
+        type: string
+    required:
+    - status
+    type: object
+  ds.ErrorResponse:
+    properties:
+      error:
+        type: string
+    type: object
+  ds.MessageResponse:
+    properties:
+      message:
+        type: string
+    type: object
+  ds.PaginatedResponse:
+    properties:
+      items: {}
+      total:
+        type: integer
+    type: object
+  ds.UserDTO:
+    properties:
+      id:
+        description: Изменено с uint на uuid.UUID
+        type: integer
+      is_moderator:
+        type: boolean
+      login:
+        type: string
+    type: object
+  ds.UserUpdateRequest:
+    properties:
+      is_moderator:
+        type: boolean
+      login:
+        type: string
+      password:
+        type: string
+    type: object
+  ds.UtilityApplicationDTO:
+    properties:
+      address:
+        type: string
+      date_accepted:
+        type: string
+      date_created:
+        type: string
+      date_formed:
+        type: string
+      id:
+        type: integer
+      moderator:
+        $ref: '#/definitions/ds.UserDTO'
+      moderator_id:
+        type: integer
+      services:
+        items:
+          $ref: '#/definitions/ds.UtilityApplicationServiceDTO'
+        type: array
+      status:
+        type: string
+      total_cost:
+        type: number
+      user:
+        $ref: '#/definitions/ds.UserDTO'
+      user_id:
+        type: integer
+    type: object
+  ds.UtilityApplicationServiceDTO:
+    properties:
+      custom_tariff:
+        type: number
+      quantity:
+        type: number
+      service:
+        $ref: '#/definitions/ds.UtilityServiceDTO'
+      total:
+        type: number
+      utility_application_id:
+        type: integer
+      utility_service_id:
+        type: integer
+    type: object
+  ds.UtilityApplicationServiceUpdateRequest:
+    properties:
+      quantity:
+        description: расход
+        type: number
+      tariff:
+        description: переопределенный тариф
+        type: number
+    type: object
+  ds.UtilityApplicationUpdateRequest:
+    properties:
+      address:
+        type: string
+      moderator_id:
+        type: integer
+      status:
+        type: string
+      total_cost:
+        type: number
+    type: object
+  ds.UtilityServiceCreateRequest:
+    properties:
+      description:
+        type: string
+      image_url:
+        type: string
+      tariff:
+        type: number
+      title:
+        type: string
+      unit:
+        type: string
+    required:
+    - description
+    - tariff
+    - title
+    - unit
+    type: object
+  ds.UtilityServiceDTO:
+    properties:
+      description:
+        type: string
+      id:
+        type: integer
+      image_url:
+        type: string
+      tariff:
+        type: number
+      title:
+        type: string
+      unit:
+        type: string
+    type: object
+  ds.UtilityServiceUpdateRequest:
+    properties:
+      description:
+        type: string
+      image_url:
+        type: string
+      tariff:
+        type: number
+      title:
+        type: string
+      unit:
+        type: string
+    type: object
+host: localhost:8080
+info:
+  contact:
+    email: bitop@spatecon.ru
+    name: API Support
+    url: https://vk.com/bmstu_schedule
+  description: Bmstu Open IT Platform
+  license:
+    name: AS IS (NO WARRANTY)
+  title: BITOP
+  version: "1.0"
+paths:
+  /api/applications:
+    get:
+      consumes:
+      - application/json
+      description: Get filtered list of applications (excluding deleted and drafts)
+        with date range and status filters. Requires JWT token.
+      parameters:
+      - description: 'JWT Token in format: Bearer {token}'
+        in: header
+        name: authorization
+        required: true
+        type: string
+      - description: 'Status filter: DRAFT, FORMED, COMPLETED, REJECTED'
+        in: query
+        name: status
+        type: string
+      - description: Date from filter (YYYY-MM-DD)
+        in: query
+        name: from
+        type: string
+      - description: Date to filter (YYYY-MM-DD)
+        in: query
+        name: to
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/ds.UtilityApplicationDTO'
+            type: array
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ds.ErrorResponse'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/ds.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ds.ErrorResponse'
+      summary: Get filtered list of utility applications
+      tags:
+      - applications
+  /api/applications/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete application (only by creator)
+      parameters:
+      - description: Application ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/ds.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ds.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Delete application
+      tags:
+      - applications
+    get:
+      consumes:
+      - application/json
+      description: Get detailed application information with services
+      parameters:
+      - description: Application ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/ds.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/ds.ErrorResponse'
+      summary: Get application by ID
+      tags:
+      - applications
+    put:
+      consumes:
+      - application/json
+      description: Update application data
+      parameters:
+      - description: Application ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Application data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/ds.UtilityApplicationUpdateRequest'
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/ds.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ds.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Update application
+      tags:
+      - applications
+  /api/applications/{id}/form:
+    put:
+      consumes:
+      - application/json
+      description: Form draft application to make it ready for processing
+      parameters:
+      - description: Application ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/ds.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ds.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Form application
+      tags:
+      - applications
+  /api/applications/{id}/resolve:
+    put:
+      consumes:
+      - application/json
+      description: Resolve application by moderator (Admin/Manager only)
+      parameters:
+      - description: Application ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Resolution data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/ds.ApplicationStatusUpdateRequest'
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/ds.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ds.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Resolve application
+      tags:
+      - applications
+  /api/applications/{id}/services/{service_id}:
+    delete:
+      consumes:
+      - application/json
+      description: Remove service from application (without M-M PK)
+      parameters:
+      - description: Application ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Service ID
+        in: path
+        name: service_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+          schema:
+            $ref: '#/definitions/ds.MessageResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/ds.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ds.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Remove service from application
+      tags:
+      - applications
+    put:
+      consumes:
+      - application/json
+      description: Update service quantity/tariff in application (without M-M PK)
+      parameters:
+      - description: Application ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Service ID
+        in: path
+        name: service_id
+        required: true
+        type: integer
+      - description: Service update data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/ds.UtilityApplicationServiceUpdateRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/ds.MessageResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/ds.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ds.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Update application service
+      tags:
+      - applications
+  /api/applications/cart:
+    get:
+      consumes:
+      - application/json
+      description: Get draft application ID and service count for current user
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get cart badge
+      tags:
+      - applications
+  /api/applications/draft/services/{service_id}:
+    post:
+      consumes:
+      - application/json
+      description: Add service to draft application (application is created automatically)
+      parameters:
+      - description: Service ID
+        in: path
+        name: service_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/ds.MessageResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/ds.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ds.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Add service to draft application
+      tags:
+      - applications
+  /api/login:
+    post:
+      consumes:
+      - application/json
+      description: Authenticate user and return JWT token
+      parameters:
+      - description: Login credentials
+        in: body
+        name: request
+        required: true
+        schema:
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
+      summary: User login
+      tags:
+      - auth
+  /api/logout:
+    post:
+      consumes:
+      - application/json
+      description: Invalidate JWT token by adding it to blacklist
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: User logout
+      tags:
+      - auth
+  /api/users/{id}:
+    get:
+      consumes:
+      - application/json
+      description: Get user information by user ID
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/ds.UserDTO'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/ds.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/ds.ErrorResponse'
+      summary: Get user data by ID
+      tags:
+      - users
+    put:
+      consumes:
+      - application/json
+      description: Update user information
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: User update data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/ds.UserUpdateRequest'
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/ds.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ds.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Update user data
+      tags:
+      - users
+  /api/utilities:
+    get:
+      consumes:
+      - application/json
+      description: Get paginated list of utility services
+      parameters:
+      - description: Filter by title
+        in: query
+        name: title
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/ds.PaginatedResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ds.ErrorResponse'
+      summary: Get utility services
+      tags:
+      - utilities
+    post:
+      consumes:
+      - application/json
+      description: Create new utility service (Admin/Manager only)
+      parameters:
+      - description: Service data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/ds.UtilityServiceCreateRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/ds.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ds.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Create utility service
+      tags:
+      - utilities
+  /api/utilities/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete utility service (Admin/Manager only)
+      parameters:
+      - description: Service ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/ds.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ds.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Delete utility service
+      tags:
+      - utilities
+    get:
+      consumes:
+      - application/json
+      description: Get detailed information about a utility service
+      parameters:
+      - description: Service ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/ds.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/ds.ErrorResponse'
+      summary: Get utility service by ID
+      tags:
+      - utilities
+    put:
+      consumes:
+      - application/json
+      description: Update existing utility service (Admin/Manager only)
+      parameters:
+      - description: Service ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Service data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/ds.UtilityServiceUpdateRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/ds.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ds.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Update utility service
+      tags:
+      - utilities
+  /api/utilities/{id}/image:
+    post:
+      consumes:
+      - multipart/form-data
+      description: Upload/replace utility service image using minio (Admin/Manager
+        only)
+      parameters:
+      - description: Service ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Image file
+        in: formData
+        name: file
+        required: true
+        type: file
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/ds.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ds.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Upload utility service image
+      tags:
+      - utilities
+  /utilities_application/{id}:
+    get:
+      description: Get utility application by ID or create new draft
+      parameters:
+      - description: Application ID
+        in: path
+        name: id
+        type: string
+      produces:
+      - text/html
+      responses:
+        "200":
+          description: OK
+      summary: Get utility application
+      tags:
+      - applications
+schemes:
+- https
+- http
+swagger: "2.0"

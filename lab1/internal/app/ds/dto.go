@@ -1,10 +1,12 @@
 package ds
 
-import "time"
+import (
+	"time"
+)
 
 // User DTOs
 type UserDTO struct {
-	ID          uint   `json:"id"`
+	ID          uint   `json:"id"` // Изменено с uint на uuid.UUID
 	Login       string `json:"login"`
 	IsModerator bool   `json:"is_moderator"`
 }
@@ -132,4 +134,32 @@ type ApplicationStatsDTO struct {
 	DraftCount        int     `json:"draft_count"`
 	FormedCount       int     `json:"formed_count"`
 	CompletedCount    int     `json:"completed_count"`
+}
+type ErrorResponse struct {
+	Error string `json:"error"`
+}
+
+// MessageResponse represents success message
+type MessageResponse struct {
+	Message string `json:"message"`
+}
+
+// LoginRequest represents login credentials
+type LoginRequest struct {
+	Login    string `json:"login"`
+	Password string `json:"password"`
+}
+
+// RegisterRequest represents registration data
+type RegisterRequest struct {
+	Name string `json:"name"`
+	Pass string `json:"pass"`
+}
+
+// RegisterResponse represents registration response
+type RegisterResponse struct {
+	Ok bool `json:"ok"`
+}
+type LogoutRequest struct {
+	Token string `json:"token"`
 }

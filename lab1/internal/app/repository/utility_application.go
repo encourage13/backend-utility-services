@@ -3,6 +3,7 @@ package repository
 import (
 	"fmt"
 	"lab1/internal/app/ds"
+	"lab1/internal/app/role"
 	"time"
 
 	"gorm.io/gorm"
@@ -69,7 +70,6 @@ func (r *Repository) GetUtilityApplicationByID(appID uint) (ds.UtilityApplicatio
 }
 
 func (r *Repository) AddServiceToApplication(appID uint, serviceID uint32, quantity float32) error {
-
 	var app ds.UtilityApplication
 	if err := r.db.First(&app, "id = ?", appID).Error; err != nil {
 		return err
@@ -87,7 +87,6 @@ func (r *Repository) AddServiceToApplication(appID uint, serviceID uint32, quant
 	).First(&existing)
 
 	if check.Error == nil {
-
 		existing.Quantity += quantity
 		existing.Total = existing.Quantity * svc.Tariff
 		return r.db.Save(&existing).Error
@@ -161,7 +160,6 @@ func (r *Repository) GetApplicationsFiltered(status, from, to string) ([]ds.Util
 
 	if from != "" {
 		if fromTime, err := time.Parse("2006-01-02", from); err == nil {
-
 			query = query.Where("(status = ? AND date_created >= ?) OR (status != ? AND date_formed >= ?)",
 				ds.DRAFT, fromTime, ds.DRAFT, fromTime)
 		}
@@ -240,7 +238,7 @@ func (r *Repository) ResolveApplication(id uint, moderatorID uint, action string
 		if err := tx.First(&moderator, moderatorID).Error; err != nil {
 			return err
 		}
-		if !moderator.IsModerator {
+		if moderator.Role != role.Manager && moderator.Role != role.Admin {
 			return fmt.Errorf("only moderators can resolve applications")
 		}
 
@@ -293,7 +291,6 @@ func (r *Repository) LogicallyDeleteApplication(appID uint) error {
 
 func (r *Repository) UpdateApplicationService(appID uint, serviceID uint32, req ds.UtilityApplicationServiceUpdateRequest) error {
 	return r.db.Transaction(func(tx *gorm.DB) error {
-
 		var link ds.UtilityApplicationService
 		if err := tx.Where("utility_application_id = ? AND utility_service_id = ?", appID, serviceID).
 			First(&link).Error; err != nil {

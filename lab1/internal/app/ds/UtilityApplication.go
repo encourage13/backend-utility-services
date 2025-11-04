@@ -1,10 +1,12 @@
 package ds
 
-import "time"
+import (
+	"time"
+)
 
 type UtilityApplication struct {
 	ID           uint      `gorm:"primaryKey;autoIncrement"`
-	UserID       uint      `gorm:"not null;index"`
+	UserID       uint      `gorm:"not null"`
 	Status       string    `gorm:"size:64;default:DRAFT;not null"`
 	TotalCost    float32   `gorm:"not null;default:0"`
 	Address      string    `gorm:"size:512;default:null"`

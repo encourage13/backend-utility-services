@@ -13,7 +13,7 @@ services:
     volumes:
       - minio-data:/data
   postgres:
-    image: postgres:latest
+    image: postgres:17
     environment:  
       POSTGRES_USER: root
       POSTGRES_PASSWORD: mydbpassword
@@ -29,6 +29,16 @@ services:
       - "8081:8080"
     depends_on:
       - postgres
+
+  redis:
+    image: redis:6.2-alpine
+    restart: always
+    ports:
+      - '6379:6379'
+    command: redis-server --save 20 1 --loglevel warning --requirepass password
+    volumes:
+      - redis-data:/data
 volumes:
   minio-data:
   postgres_data:
+  redis-data:

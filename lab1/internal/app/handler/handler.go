@@ -1,68 +1,114 @@
 package handler
 
+// @title BITOP
+// @version 1.0
+// @description Bmstu Open IT Platform
+// @host localhost:8080
+// @BasePath /
 import (
+	"lab1/internal/app/config"
+	"lab1/internal/app/redis"
 	"lab1/internal/app/repository"
+	"lab1/internal/app/role"
 	"path/filepath"
 
-	"github.com/gin-gonic/gin"
-	log "github.com/sirupsen/logrus"
-)
+	_ "lab1/docs" // импортируйте docs папку (замените lab1 на имя вашего модуля)
 
-const HardcodedUserID = 1
+	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
+	log "github.com/sirupsen/logrus"
+	swaggerFiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
+)
 
 type Handler struct {
 	Repository *repository.Repository
+	Redis      *redis.Client
+	Config     *config.Config
 }
 
-func NewHandler(r *repository.Repository) *Handler {
-	return &Handler{r}
+func NewHandler(r *repository.Repository, redisClient *redis.Client, cfg *config.Config) *Handler {
+	return &Handler{
+		Repository: r,
+		Redis:      redisClient,
+		Config:     cfg,
+	}
 }
 
-func (h *Handler) GetCurrentUserID() uint {
-	return HardcodedUserID
+// GetCurrentUserID получает ID пользователя из контекста gin
+func (h *Handler) GetCurrentUserID(gCtx *gin.Context) uint {
+	userID, exists := gCtx.Get("userID")
+	if !exists {
+		return 0
+	}
+	return userID.(uint)
+}
+
+// GetCurrentUserRole получает роль пользователя из контекста gin
+func (h *Handler) GetCurrentUserRole(gCtx *gin.Context) role.Role {
+	userRole, exists := gCtx.Get("userRole")
+	if !exists {
+		return role.Buyer
+	}
+	return userRole.(role.Role)
+}
+
+// GetCurrentUserUUID - временная заглушка
+func (h *Handler) GetCurrentUserUUID() uuid.UUID {
+	return uuid.Nil
 }
 
 func (h *Handler) RegisterHandler(r *gin.Engine) {
-	// HTML роуты для фронтенда
+	// HTML роуты для фронтенда (публичные)
+
+	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+
 	r.GET("/", h.GetUtilities)
 	r.GET("/utilities", h.GetUtilities)
 	r.GET("/utilities/:id", h.GetUtility)
 	r.GET("/utilities_application", h.GetUtilitiesApplication)
 	r.GET("/utilities_application/:id", h.GetUtilitiesApplication)
-	r.POST("/utilities_application/add", h.AddServiceInUtilityApplication)
-	r.POST("/utilities_application/delete", h.DeleteUtilityApplication)
 
 	// API роуты
 	api := r.Group("/api")
 	{
-		// Домен коммунальных услуг
-		api.GET("/utilities", h.GetUtilityServicesAPI)
-		api.GET("/utilities/:id", h.GetUtilityServiceAPI)
-		api.POST("/utilities", h.CreateUtilityService)
-		api.PUT("/utilities/:id", h.UpdateUtilityService)
-		api.DELETE("/utilities/:id", h.DeleteUtilityService)
-		api.POST("/utilities/:id/image", h.UploadUtilityServiceImage)
-		api.POST("/applications/draft/services/:service_id", h.AddServiceToDraft)
+		// Публичные эндпоинты (не требуют аутентизации)
+		api.POST("/sign_up", h.Register)
+		api.POST("/login", h.Login)
 
-		// Домен заявок
-		api.GET("/applications/cart", h.GetCartBadge)
-		api.GET("/applications", h.ListApplications)
-		api.GET("/applications/:id", h.GetApplication)
-		api.PUT("/applications/:id", h.UpdateApplication)
-		api.PUT("/applications/:id/form", h.FormApplication)
-		api.PUT("/applications/:id/resolve", h.ResolveApplication)
-		api.DELETE("/applications/:id", h.DeleteApplication)
+		// Защищенные эндпоинты (требуют JWT токен)
+		protected := api.Group("")
+		protected.Use(h.WithAuthCheck()) // применяем аутентификацию ко всем защищенным эндпоинтам
+		{
+			// Аутентификация
+			protected.POST("/logout", h.Logout)
 
-		// Домен связи заявок и услуг
-		api.DELETE("/applications/:id/services/:service_id", h.RemoveServiceFromApplication)
-		api.PUT("/applications/:id/services/:service_id", h.UpdateApplicationService)
+			// Коммунальные услуги (доступны всем аутентифицированным пользователям)
+			protected.GET("/utilities", h.GetUtilityServicesAPI)
+			protected.GET("/utilities/:id", h.GetUtilityServiceAPI)
+			protected.POST("/applications/draft/services/:service_id", h.AddServiceToDraft)
+			protected.GET("/applications/cart", h.GetCartBadge)
 
-		// Домен пользователей
-		api.POST("/users", h.Register)
-		api.GET("/users/:id", h.GetUserData)
-		api.PUT("/users/:id", h.UpdateUserData)
-		api.POST("/auth/login", h.Login)
-		api.POST("/auth/logout", h.Logout)
+			// Заявки пользователя
+			protected.GET("/applications", h.ListApplications)
+			protected.GET("/applications/:id", h.GetApplication)
+			protected.PUT("/applications/:id", h.UpdateApplication)
+			protected.PUT("/applications/:id/form", h.FormApplication)
+			protected.DELETE("/applications/:id", h.DeleteApplication)
+			protected.DELETE("/applications/:id/services/:service_id", h.RemoveServiceFromApplication)
+			protected.PUT("/applications/:id/services/:service_id", h.UpdateApplicationService)
+
+			// Административные эндпоинты (только для модераторов и админов)
+			admin := protected.Group("")
+			admin.Use(h.WithAuthCheck(role.Manager, role.Admin))
+			{
+				admin.POST("/utilities", h.CreateUtilityService)
+				admin.PUT("/utilities/:id", h.UpdateUtilityService)
+				admin.DELETE("/utilities/:id", h.DeleteUtilityService)
+				admin.POST("/utilities/:id/image", h.UploadUtilityServiceImage)
+				admin.PUT("/applications/:id/resolve", h.ResolveApplication)
+			}
+		}
 	}
 }
 
