@@ -1,1 +1,11 @@
-# Web_Autumn2025
+# Основной веб сервис для расчёта стоимости коммунальных услуг
+### Бакушев И.О. ИУ5-53Б
+В данном репозитории представлен основной веб-сервис для расчёта стоимости коммунальных услуг.
+
+Актуальная ветка - authentication
+
+Навигация по проекту:
+
+- Фронтенд - https://github.com/encourage13/frontend-utility-services.git
+- Основной веб-сервис - https://github.com/encourage13/backend-utility-services.git
+- Асинхронный веб-сервис - https://github.com/encourage13/Async-Utility-Calculation.git
